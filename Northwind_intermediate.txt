@@ -1,0 +1,118 @@
+Use northwind_db
+
+20. Categories, and the total products in each category
+For this problem, we’d like to see the total number of products in each
+category. Sort the results by the total number of products, in descending
+order
+Ans:
+Select * from categories
+Select category_name,count(c.category_ID) as total_product from categories c 
+join products p on c.category_ID=p.category_ID group by category_name order by total_product desc;
+
+21. Total customers per country/city
+In the Customers table, show the total number of customers per Country
+and City
+Ans:
+Select country,city,count(customer_id) as total_customers from customers group by country,city order by total_customers desc ;
+
+22. Products that need reordering
+What products do we have in our inventory that should be reordered?
+For now, just use the fields UnitsInStock and ReorderLevel, where
+UnitsInStock is less than the ReorderLevel, ignoring the fields
+UnitsOnOrder and Discontinued.
+Order the results by ProductID
+Ans:
+select product_id,product_name,units_in_stock,reorder_level from products where units_in_stock < reorder_level;
+
+23. Products that need reordering, continued
+Now we need to incorporate these fields—UnitsInStock, UnitsOnOrder,
+ReorderLevel, Discontinued—into our calculation. We’ll define
+“products that need reordering” with the following:
+UnitsInStock plus UnitsOnOrder are less than or equal to
+ReorderLevel
+The Discontinued flag is false (0)
+Ans:
+select product_id,product_name,units_in_stock,units_on_order,reorder_level,discontinued from products
+where units_in_stock + units_on_order <= reorder_level and discontinued= 0;
+
+24. Customer list by region
+A salesperson for Northwind is going on a business trip to visit
+customers, and would like to see a list of all customers, sorted by
+region, alphabetically.
+However, he wants the customers with no region (null in the Region
+field) to be at the end, instead of at the top, where you’d normally find
+the null values. Within the same region, companies should be sorted by
+CustomerID
+Ans:
+
+
+25. High freight charges
+Some of the countries we ship to have very high freight charges. We'd
+like to investigate some more shipping options for our customers, to be
+able to offer them lower freight charges. Return the three ship countries
+with the highest average freight overall, in descending order by average
+freight
+Ans:
+Select ship_country,avg(freight) as Avg_freight from orders group by ship_country order by Avg_freight desc limit 3;
+
+26. High freight charges - 2015
+We're continuing on the question above on high freight charges. Now,
+instead of using all the orders we have, we only want to see orders from
+the year 2015
+Ans:
+Select ship_country,avg(freight) as Avg_freight from orders where order_date>='2015-01-01' group by ship_country order by Avg_freight desc;
+
+27. High freight charges with between
+Another (incorrect) answer to the problem above is this:
+Another (incorrect) answer to the problem above is this:
+Select Top 3
+ShipCountry
+,AverageFreight = avg(freight)
+From Orders
+Where
+OrderDate between '1/1/2015' and '12/31/2015'
+Group By ShipCountry
+Order By AverageFreight desc
+
+Notice when you run this, it gives Sweden as the ShipCountry with the
+third highest freight charges. However, this is wrong - it should be
+France.
+What is the OrderID of the order that the (incorrect) answer above is
+missing?
+
+Ans:
+Select Ship_Country,avg(freight) as AverageFreight From Orders
+Where Order_Date between '2015-01-01' and '2016-01-01' Group By Ship_Country Order By AverageFreight desc limit 3;
+
+28. High freight charges - last year
+We're continuing to work on high freight charges. We now want to get
+the three ship countries with the highest average freight charges. But
+instead of filtering for a particular year, we want to use the last 12
+months of order data, using as the end date the last OrderDate in Orders
+Ans:
+Select ship_country,avg(freight) as Averagefreight from orders
+where order_date>date((select max(order_date) from orders)-interval 12 month) group by ship_country order by Averagefreight desc limit 3;
+
+29. Inventory list
+We're doing inventory, and need to show information like the below, for
+all orders. Sort by OrderID and Product ID
+Ans:
+Select e.employee_id,e.last_name,o.order_id,p.product_name,od.quantity from orders o join order_details od on o.order_id=od.order_id
+join Employees e on o.employee_id=e.employee_id
+join products p on p.product_id=od.product_id order by o.order_id and p.product_id ;
+
+30. Customers with no orders
+There are some customers who have never actually placed an order.
+Show these customers
+Ans:
+Select c.customer_id as customer_customerid,o.customer_id as order_customerid from customers c 
+left join orders o on o.customer_id=c.customer_id where o.customer_id is null;
+
+31. Customers with no orders for EmployeeID 4
+One employee (Margaret Peacock, EmployeeID 4) has placed the most
+orders. However, there are some customers who've never placed an order
+with her. Show only those customers who have never placed an order
+with her
+Ans:
+Select c.customer_id,o.customer_id from customers c left join orders o on c.customer_id=o.customer_id and o.employee_id='4'
+where o.customer_id is null;
